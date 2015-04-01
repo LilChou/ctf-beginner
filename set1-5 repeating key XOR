@@ -1,0 +1,11 @@
+#plaintext = raw_input("input:")
+plaintext = "Burning 'em, if you ain't quick and nimble I go crazy when I hear a cymbal"
+num=0
+key='ICE'
+ans=''
+for ch in plaintext:
+	t = ord(ch)^ord(key[num%3])
+	ans = ans + chr(t)	
+	num += 1 
+
+print ans.encode('hex')
