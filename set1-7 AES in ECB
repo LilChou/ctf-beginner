@@ -1,0 +1,12 @@
+from Crypto.Cipher import AES
+
+key = 'YELLOW SUBMARINE'
+fin = open('7.txt' , 'r')
+
+ciphertext = fin.read().replace('\n','')
+ciphertext = ciphertext.decode('base64')
+
+AES_decryptor = AES.new(key, AES.MODE_ECB)
+plaintext = AES_decryptor.decrypt(ciphertext)
+
+print plaintext
