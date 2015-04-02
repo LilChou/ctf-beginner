@@ -1,0 +1,14 @@
+#length = raw_input("give me the padding length:")
+plaintext = "YELLOW SUBMARINE"
+length=20
+
+n = length - (len(plaintext) % length)
+padding = hex(n)[2:]
+if len(padding)==1:
+	padding = '0'+padding
+
+padding = '\\x' + padding
+for i in xrange(0, n):
+	plaintext += padding
+
+print plaintext
