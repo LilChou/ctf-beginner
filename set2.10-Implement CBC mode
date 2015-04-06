@@ -1,0 +1,42 @@
+from Crypto.Cipher import AES
+
+key = 'YELLOW SUBMARINE'
+fin = open('10.txt' , 'r')
+key_size = len(key)
+
+ciphertext = fin.read().replace('\n','')
+ciphertext = ciphertext.decode('base64')
+temp={}
+temp[0]=""
+for i in xrange(0, len(ciphertext)):
+	if i%key_size == 0:
+		temp[i/key_size] = ""
+	temp[i/key_size] += ciphertext[i]
+
+#print len(temp[i/key_size])
+#print 'i=', i
+#print 'there are', i/key_size, 'lines'
+
+lines = i/key_size
+
+
+AES_decryptor = AES.new(key, AES.MODE_ECB)
+plaintext = ""
+
+for i in xrange(lines, 0, -1):
+	temp_text=AES_decryptor.decrypt(temp[i])
+	t=''
+	for j in xrange(0, len(key)):
+		t_int = ord(temp_text[j])^ord(temp[i-1][j])#this is an int
+		t += chr(t_int)
+	plaintext = t+plaintext
+
+temp_text=AES_decryptor.decrypt(temp[0])
+for j in xrange(0, len(key)):
+	t_int = ord(temp_text[j])^0
+	t += chr(t_int)
+
+plaintext = t+plaintext
+
+#print 'finish'
+print plaintext
