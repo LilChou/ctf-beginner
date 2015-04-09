@@ -1,0 +1,62 @@
+import random
+from Crypto import Random
+from Crypto.Cipher import AES
+import base64
+#####################################
+##  key generate  ###################
+#####################################
+def key_generate():
+	key=""
+	for i in xrange(0, 16, 1):
+		rand = random.randint(0,35)
+		if rand<26:
+			rand += ord('A')
+		else:
+			rand += ord('0')
+		key += chr(rand)
+
+	print 'key:', key
+	return key
+
+#####################################
+##  choose mode : ECB/CBC  ##########
+#####################################
+def choose_mode():
+	if random.randint(0, 1):
+		print 'mode=ECB'
+		return 'ECB'
+	else:
+		print 'mode=CBC'
+		return 'CBC'
+
+#####################################
+##  padding  ########################
+#####################################
+def padding(plaintext):
+	length = 16
+	n = length - (len(plaintext) % length)
+
+	plaintext = plaintext + chr(n) * n
+	return plaintext
+
+#####################################
+##  main                        #####
+#####################################
+key = key_generate()
+mode = choose_mode()
+#plaintext = raw_input('plaintext:')
+plaintext = 'Omg, i am so handsome!!'
+plaintext = padding(plaintext)
+
+
+if mode == 'ECB':
+	AES_encryptor = AES.new(key, AES.MODE_ECB)
+	ciphertext = base64.b64encode(AES_encryptor.encrypt(plaintext))
+
+else :
+    IV = key_generate()
+    AES_encryptor = AES.new(key, AES.MODE_CFB, IV)
+    ciphertext = base64.b64encode(AES_encryptor.encrypt(plaintext))
+
+#ciphertext = ciphertext.decode('base64').encode('hex')
+print 'cipher', ciphertext
