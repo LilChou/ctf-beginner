@@ -11,4 +11,5 @@ padding = '\\x' + padding
 for i in xrange(0, n):
 	plaintext += padding
 
+#plaintext = plaintext + chr(n) * n
 print plaintext
