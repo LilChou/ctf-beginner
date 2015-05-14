@@ -1,0 +1,141 @@
+################################
+##crypto set1_6 repeating xor ##
+##                by atopshih ##
+################################
+
+import operator
+#########################################
+##file input and convert base64 to string
+#########################################
+fin = open('6.txt', 'r')
+cipher = fin.read().replace('\n' , '')
+cipher = cipher.decode('base64')
+#cipher = cipher.decode('hex')
+
+#########################################
+##function to calculate hamming_distance
+#########################################
+def hamming_distance(s1, s2):
+	b1 = [format(ord(x) , '08b') for x in s1]
+	b2 = [format(ord(x) , '08b') for x in s2]
+	if len(s1) != len(s2):
+		print "ERROR"
+	return sum(ch1 != ch2 for ch1, ch2 in zip("".join(b1),"".join(b2)))
+#########################################
+##calculate the most likely size of key
+#########################################
+grade = 10000.0
+size = 0
+nor = 0.0
+gList = {} ##list for recode all pair of size:grade
+for s in xrange(2 , 40):
+	tg = 0.0
+	cc = 0
+	for l in xrange(0 , len(cipher)-2*s , s):
+		tg += hamming_distance(str(cipher[l:l+s]) ,str(cipher[l+s:l+2*s]))
+		cc +=1
+	tg = float(tg)/float(cc)
+	nor = float(tg)/float(s)
+	if nor < grade:
+		grade = nor
+		size = s
+	gList[s] = nor
+sorted_gList = sorted(gList.items(), key=operator.itemgetter(1)) ##to sort gList by its grade
+
+
+cipher = cipher.encode('hex') ##convert input to hex format(convenient for calculation)
+freqs = {
+    'a': 0.0651738,
+    'b': 0.0124248,
+    'c': 0.0217339,
+    'd': 0.0349835,
+    'e': 0.1041442,
+    'f': 0.0197881,
+    'g': 0.0158610,
+    'h': 0.0492888,
+    'i': 0.0558094,
+    'j': 0.0009033,
+    'k': 0.0050529,
+    'l': 0.0331490,
+    'm': 0.0202124,
+    'n': 0.0564513,
+    'o': 0.0596302,
+    'p': 0.0137645,
+    'q': 0.0008606,
+    'r': 0.0497563,
+    's': 0.0515760,
+    't': 0.0729357,
+    'u': 0.0225134,
+    'v': 0.0082903,
+    'w': 0.0171272,
+    'x': 0.0013692,
+    'y': 0.0145984,
+    'z': 0.0007836,
+	' ': 0.1918182 
+}
+################################################
+##cut data into blocks in size from previous part and grading by xor each block with one byte
+################################################
+base = size
+ffgra = 0
+ffstr = ""
+ffbase = 0
+ffkey = ""
+ff = ""
+for base , _ in sorted_gList[0:1]: 
+## this for only do once (I write it cause first case may not be themost likely key size)
+	#print "base , grade" , base , _
+	block = {} ##cut into blocks
+	for x in xrange(0 , base):
+		block[x] = ""
+		for y in xrange (x*2 , len(cipher) , base*2):
+			block[x] += cipher[y:y+2]
+	key = ""
+	keychar = 0
+	plain = {}
+	hString = ""
+	gra = 0.0
+	tmpblock = {}
+	hGrade = 0.0
+	for nee in block:##grading
+		str = block[nee]
+		hGrade = 0.0
+		count = {}
+		for x in xrange(0 , 256): ## xor in range 00 to FF(may occur condition that key is not printable ascii)
+			plain[x] = ""
+			count = [0]*256
+			for y in xrange(0 , len(str) , 2):
+				tmp = chr(int(str[y:y+2] , 16)^x)
+				plain[x]+= tmp
+				count[ord(tmp)]+=1
+			gra = 0.0
+			for y in xrange(ord('a') , ord('z')+1):
+				gra+= count[y]*freqs[chr(y)]
+				gra+= count[y-32]*freqs[chr(y)]
+			gra+=count[ord(' ')]*freqs[' ']
+			if gra > hGrade:
+				hGrade = gra
+				hString = plain[x]
+				keychar = x
+		block[nee] = hString
+		key+=chr(keychar)
+	#print "key" , key
+	#print "key hex" , key.encode('hex')
+	#print "plain grade" , hGrade
+	#######################################
+	## convert blocks into original plain text
+	#######################################
+	ff= ""
+	for x in xrange(0 , len(block[0])):
+		for y in xrange(0 , base):
+			if x < len(block[y]):
+				ff+=block[y][x]
+
+	if hGrade > ffgra:
+		ffgra = hGrade
+		ffstr = ff
+		ffbase = base
+		ffkey = key
+print "base" , ffbase
+print "key" , key
+print ffstr
