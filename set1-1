@@ -1,3 +1,0 @@
-
-t = raw_input("give me a text:")
-print t.decode('hex').encode('base64')
