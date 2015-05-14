@@ -1,0 +1,24 @@
+from Crypto.Cipher import AES
+
+fin = open('8.txt' , 'r')
+cipher = fin.read()
+strs = cipher.split('\n')
+
+print "total strs: " , len(strs)
+
+count = {}
+base = 32
+for i in xrange(0 , len(strs)):
+	count[i] = 0
+	for j in xrange(0 , len(strs[i]) , base):
+		for k in xrange(j , len(strs[i]) , base):
+			if strs[i][j:j+base] == strs[i][k:k+base]:
+				count[i]+=1
+
+
+pre = 0
+for i in count:
+	if count[i] != pre:
+		print "[str# : count] = " , i , count[i]
+	pre = count[i]
+	
